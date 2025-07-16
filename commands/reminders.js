@@ -88,7 +88,7 @@ async function contestReminder(client) {
 
             const targetChannel = await client.channels.fetch(channelId);
             await targetChannel.send({
-                content: `<@&${roleId}> ${contest_name} is starting on ${formatTime(contest_unix)}`,
+                content: `<@&${roleId}> ${contest_name} starts on ${formatTime(contest_unix)}.`,
                 allowedMentions: {
                     roles: [roleId]
                 }
