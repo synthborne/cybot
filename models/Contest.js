@@ -14,7 +14,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  announce: {
+  announce1: {
+    type: Boolean,
+    default: false
+  },
+  announce2: {
     type: Boolean,
     default: false
   },

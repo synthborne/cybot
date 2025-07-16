@@ -6,6 +6,26 @@ const { resetUserDatabase } = require('./reset_db.js');
 const roleId = '1394364111709536396';
 const channelId = '1394761312210522132';
 
+function formatTime(unixTimestamp) {
+    const date = new Date(unixTimestamp * 1000);
+
+    const timeOptions = {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Kolkata'
+    };
+
+    const day = date.toLocaleString('en-IN', { day: 'numeric', timeZone: 'Asia/Kolkata' });
+    const month = date.toLocaleString('en-IN', { month: 'long', timeZone: 'Asia/Kolkata' });
+    const year = date.toLocaleString('en-IN', { year: 'numeric', timeZone: 'Asia/Kolkata' });
+
+    const formattedDate = `${day} ${month} ${year}`;
+    const formattedTime = date.toLocaleString('en-IN', timeOptions);
+
+    return `${formattedDate}, ${formattedTime} (IST)`;
+}
+
 async function upcomingContests(){
     const response = await fetch('https://codeforces.com/api/contest.list');
     const data = await response.json();
@@ -39,16 +59,17 @@ async function contestReminder(client) {
         const contest_id = data.result[i].id;
         const contest_name = data.result[i].name;
         const contest_phase = data.result[i].phase;
+        const contest_unix = data.result[i].startTimeSeconds;
         const contest_time = data.result[i].relativeTimeSeconds;
 
         if(contest_phase === 'BEFORE' && Math.abs(contest_time) <= 3600){
             const contest = await Contest.findOne({ contestId: contest_id });
             if(contest === null) continue;
-            if(contest.announce === true) continue;
+            if(contest.announce2 === true) continue;
 
             const targetChannel = await client.channels.fetch(channelId);
             await targetChannel.send({
-                content: `<@&${roleId}> ${contest_name} is starting soon!`,
+                content: `<@&${roleId}> ${contest_name} is starting soon. Get ready to gamble some rating.`,
                 allowedMentions: {
                     roles: [roleId]
                 }
@@ -56,7 +77,26 @@ async function contestReminder(client) {
 
             await Contest.updateOne(
                 { contestId: contest_id },
-                { $set: {announce: true}}
+                { $set: {announce2: true}}
+            );
+        }
+
+        if(contest_phase === 'BEFORE' && Math.abs(contest_time) <= 86400000){
+            const contest = await Contest.findOne({ contestId: contest_id });
+            if(contest === null) continue;
+            if(contest.announce1 === true) continue;
+
+            const targetChannel = await client.channels.fetch(channelId);
+            await targetChannel.send({
+                content: `<@&${roleId}> ${contest_name} is starting on ${formatTime(contest_unix)}`,
+                allowedMentions: {
+                    roles: [roleId]
+                }
+            });
+
+            await Contest.updateOne(
+                { contestId: contest_id },
+                { $set: {announce1: true}}
             );
         }
     }
