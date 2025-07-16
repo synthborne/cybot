@@ -81,7 +81,7 @@ async function contestReminder(client) {
             );
         }
 
-        if(contest_phase === 'BEFORE' && Math.abs(contest_time) <= 86400000){
+        if(contest_phase === 'BEFORE' && Math.abs(contest_time) <= 86400){
             const contest = await Contest.findOne({ contestId: contest_id });
             if(contest === null) continue;
             if(contest.announce1 === true) continue;
