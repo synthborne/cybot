@@ -40,7 +40,7 @@ client.once('ready', async () => {
         catch(err){
             console.error("Runtime error:", err);
         }
-    }, 300000);
+    }, 10000);
     setInterval(async () => {
         try{
             await resetUserDatabase(client);
